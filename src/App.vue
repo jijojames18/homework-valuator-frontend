@@ -4,7 +4,56 @@
       <b-spinner class="b-spinner"></b-spinner>
     </div>
     <div v-else>
-      {{ questions }}
+      <b-form>
+        <b-container fluid="md" class="container question-container">
+          <b-row class="justify-content-md-left">
+            <b-col col lg="4">
+              <label for="input-user-id">Phone Number</label>
+            </b-col>
+          </b-row>
+          <b-row class="justify-content-md-left">
+            <b-col col lg="6">
+              <b-form-input
+                @change="fetchExistingResponse"
+                id="input-userId"
+                v-model="userId"
+                type="text"
+                required
+              ></b-form-input>
+            </b-col>
+          </b-row>
+        </b-container>
+        <b-container
+          fluid="md"
+          class="container question-container"
+          :key="index"
+          v-for="({ question, question_id, response_type }, index) in questions"
+        >
+          <b-row class="justify-content-md-left">
+            <b-col col lg="6" class="label-column">
+              <label :for="`input-question-${question_id}`"
+                >{{ question }}
+              </label>
+            </b-col>
+          </b-row>
+          <b-row class="justify-content-md-left">
+            <b-col col lg="12">
+              <b-form-textarea
+                id="`input-question-${question_id}`"
+                rows="3"
+                max-rows="6"
+              ></b-form-textarea>
+            </b-col>
+          </b-row>
+        </b-container>
+        <b-container fluid="md" class="container">
+          <b-row class="justify-content-md-left">
+            <b-col col lg="1" class="button-col">
+              <b-button type="submit" variant="primary">Submit</b-button>
+            </b-col>
+          </b-row>
+        </b-container>
+      </b-form>
     </div>
   </div>
 </template>
@@ -22,7 +71,7 @@ export default {
     return {
       isLoading: false,
       testId: 0,
-      userId: false,
+      userId: "",
       error: false,
       questions: [],
       response: []
@@ -60,9 +109,12 @@ export default {
         .then(response => {
           if (response && response.data.length) {
             this.response = response.data;
+          } else {
+            this.response = {};
           }
         })
         .catch(error => {
+          this.response = {};
           console.error(error);
           this.error = "Internal error";
         });
@@ -79,6 +131,29 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+
+  .container {
+    &.question-container {
+      background-color: #f0f0f0;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+    }
+
+    margin-top: 14px;
+    max-width: 850px;
+
+    .row {
+      margin: 14px 0;
+      .col {
+        text-align: left;
+      }
+    }
+
+    .button-col {
+      margin: 0px;
+      padding: 0px;
+    }
+  }
 
   .spinner {
     position: fixed;
