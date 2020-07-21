@@ -1,15 +1,26 @@
 <template>
   <div id="app">
-    {{ questions }}
+    <div v-if="isLoading" class="spinner">
+      <b-spinner class="b-spinner"></b-spinner>
+    </div>
+    <div v-else>
+      {{ questions }}
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import { BSpinner } from "bootstrap-vue";
+
 export default {
   name: "app",
+  components: {
+    BSpinner
+  },
   data() {
     return {
+      isLoading: false,
       testId: 0,
       userId: false,
       error: false,
@@ -28,15 +39,17 @@ export default {
   },
   methods: {
     fetchData() {
-      console.log(process.env);
+      this.isLoading = true;
       axios
         .get(`/questions/${this.testId}`)
         .then(response => {
           if (response && response.data.length) {
             this.questions = response.data;
+            this.isLoading = false;
           }
         })
         .catch(error => {
+          this.isLoading = false;
           console.error(error);
           this.error = "Internal error";
         });
@@ -66,5 +79,23 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+
+  .spinner {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+
+    .b-spinner {
+      position: absolute;
+      top: 50%;
+      width: 100px;
+      height: 100px;
+    }
+  }
 }
 </style>
