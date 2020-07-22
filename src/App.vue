@@ -4,7 +4,7 @@
       <b-spinner class="b-spinner"></b-spinner>
     </div>
     <div v-else>
-      <b-form>
+      <b-form @submit="submitResponse" me>
         <b-container fluid="md" class="container question-container">
           <b-row class="justify-content-md-left">
             <b-col col lg="4">
@@ -39,7 +39,8 @@
           <b-row class="justify-content-md-left">
             <b-col col lg="12">
               <b-form-textarea
-                id="`input-question-${question_id}`"
+                :id="`input-question-${question_id}`"
+                v-model="response[question_id]"
                 rows="3"
                 max-rows="6"
               ></b-form-textarea>
@@ -74,7 +75,7 @@ export default {
       userId: "",
       error: false,
       questions: [],
-      response: []
+      response: {}
     };
   },
   mounted() {
@@ -87,6 +88,14 @@ export default {
     }
   },
   methods: {
+    resetResponse() {
+      let i = 0;
+      while (i < this.questions.length) {
+        const key = this.questions[i]["question_id"];
+        this.$set(this.response, key, "");
+        i++;
+      }
+    },
     fetchData() {
       this.isLoading = true;
       axios
@@ -94,6 +103,7 @@ export default {
         .then(response => {
           if (response && response.data.length) {
             this.questions = response.data;
+            this.resetResponse();
             this.isLoading = false;
           }
         })
@@ -108,18 +118,42 @@ export default {
         .get(`/answers/${this.testId}/${this.userId}`)
         .then(response => {
           if (response && response.data.length) {
-            this.response = response.data;
+            const data = response.data;
+            let i = 0;
+            while (i < data.length) {
+              this.response[data[i]["question_id"]] = data[i]["answer"];
+              i++;
+            }
           } else {
-            this.response = {};
+            this.resetResponse();
           }
         })
         .catch(error => {
-          this.response = {};
+          this.resetResponse();
           console.error(error);
           this.error = "Internal error";
         });
     },
-    submitResponse() {}
+    submitResponse(evt) {
+      evt.preventDefault();
+      let answers = Object.keys(this.response).map(key => {
+        return {
+          answer: this.response[key],
+          question_id: key
+        };
+      });
+
+      let formData = new FormData();
+      formData.append("answers", JSON.stringify(answers));
+      axios.post(`/answers/${this.testId}/${this.userId}`, formData).then(
+        response => {
+          console.log(response);
+        },
+        error => {
+          console.log(error);
+        }
+      );
+    }
   }
 };
 </script>
