@@ -3,18 +3,26 @@
     <div v-if="isLoading" class="spinner">
       <b-spinner class="b-spinner"></b-spinner>
     </div>
+    <div v-else-if="userMessage">
+      <b-container fluid="md" class="container background-container">
+        <b-row class="justify-content-md-left">
+          <b-col col lg="12">
+            {{ userMessage }}
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
     <div v-else>
       <b-form @submit="submitResponse" me>
-        <b-container fluid="md" class="container question-container">
+        <b-container fluid="md" class="container background-container">
           <b-row class="justify-content-md-left">
             <b-col col lg="4">
-              <label for="input-user-id">Phone Number</label>
+              <label for="input-user-id">Roll Number</label>
             </b-col>
           </b-row>
           <b-row class="justify-content-md-left">
             <b-col col lg="6">
               <b-form-input
-                @change="fetchExistingResponse"
                 id="input-userId"
                 v-model="userId"
                 type="text"
@@ -25,7 +33,7 @@
         </b-container>
         <b-container
           fluid="md"
-          class="container question-container"
+          class="container background-container"
           :key="index"
           v-for="({ question, question_id, response_type }, index) in questions"
         >
@@ -37,13 +45,25 @@
             </b-col>
           </b-row>
           <b-row class="justify-content-md-left">
-            <b-col col lg="12">
+            <b-col col lg="6">
               <b-form-textarea
+                v-if="response_type === 'textarea'"
                 :id="`input-question-${question_id}`"
                 v-model="response[question_id]"
                 rows="3"
                 max-rows="6"
               ></b-form-textarea>
+              <b-form-file
+                v-else-if="response_type === 'file'"
+                v-model="response[question_id]"
+                class="mt-3"
+                plain
+              ></b-form-file>
+              <b-form-input
+                v-else
+                :id="`input-question-${question_id}`"
+                v-model="response[question_id]"
+              ></b-form-input>
             </b-col>
           </b-row>
         </b-container>
@@ -73,7 +93,7 @@ export default {
       isLoading: false,
       testId: 0,
       userId: "",
-      error: false,
+      userMessage: "",
       questions: [],
       response: {}
     };
@@ -84,7 +104,7 @@ export default {
       this.testId = testId;
       this.fetchData();
     } else {
-      this.error = "Incorrect page";
+      this.userMessage = "Incorrect Test. Please use the correct test url/id";
     }
   },
   methods: {
@@ -110,7 +130,7 @@ export default {
         .catch(error => {
           this.isLoading = false;
           console.error(error);
-          this.error = "Internal error";
+          this.userMessage = "Internal error. Please contact your teacher.";
         });
     },
     fetchExistingResponse() {
@@ -131,11 +151,12 @@ export default {
         .catch(error => {
           this.resetResponse();
           console.error(error);
-          this.error = "Internal error";
+          this.userMessage = "No test found";
         });
     },
     submitResponse(evt) {
       evt.preventDefault();
+      this.isLoading = true;
       let answers = Object.keys(this.response).map(key => {
         return {
           answer: this.response[key],
@@ -146,11 +167,16 @@ export default {
       let formData = new FormData();
       formData.append("answers", JSON.stringify(answers));
       axios.post(`/answers/${this.testId}/${this.userId}`, formData).then(
-        response => {
-          console.log(response);
+        () => {
+          this.isLoading = false;
+          this.finished = true;
+          this.userMessage = "Your answers have been successfuly submitted.";
         },
         error => {
-          console.log(error);
+          this.isLoading = false;
+          console.error(error);
+          this.userMessage =
+            "Internal error. Your answers are not submitted. Please contact your teacher.";
         }
       );
     }
@@ -159,52 +185,5 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-
-  .container {
-    &.question-container {
-      background-color: #f0f0f0;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-    }
-
-    margin-top: 14px;
-    max-width: 850px;
-
-    .row {
-      margin: 14px 0;
-      .col {
-        text-align: left;
-      }
-    }
-
-    .button-col {
-      margin: 0px;
-      padding: 0px;
-    }
-  }
-
-  .spinner {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-
-    .b-spinner {
-      position: absolute;
-      top: 50%;
-      width: 100px;
-      height: 100px;
-    }
-  }
-}
+@import "app.scss";
 </style>
