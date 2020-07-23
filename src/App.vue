@@ -74,6 +74,13 @@
             </b-col>
           </b-row>
         </b-container>
+        <b-container fluid="md" class="container">
+          <b-row class="justify-content-md-left">
+            <b-col col lg="12">
+              <flip-countdown :deadline="testEndTime"></flip-countdown>
+            </b-col>
+          </b-row>
+        </b-container>
       </b-form>
     </div>
   </div>
@@ -81,12 +88,12 @@
 
 <script>
 import axios from "axios";
-import { BSpinner } from "bootstrap-vue";
+import FlipCountdown from "vue2-flip-countdown";
 
 export default {
   name: "app",
   components: {
-    BSpinner
+    FlipCountdown
   },
   data() {
     return {
@@ -95,7 +102,8 @@ export default {
       userId: "",
       userMessage: "",
       questions: [],
-      response: {}
+      response: {},
+      testEndTime: new Date(Date.now()).toString()
     };
   },
   mounted() {
@@ -121,8 +129,14 @@ export default {
       axios
         .get(`/questions/${this.testId}`)
         .then(response => {
-          if (response && response.data.length) {
-            this.questions = response.data;
+          if (
+            response &&
+            response.data &&
+            response.data.questions &&
+            response.data.questions.length
+          ) {
+            this.questions = response.data.questions;
+            this.testEndTime = response.data.test.test_end_time;
             this.resetResponse();
             this.isLoading = false;
           }
@@ -167,10 +181,24 @@ export default {
       let formData = new FormData();
       formData.append("answers", JSON.stringify(answers));
       axios.post(`/answers/${this.testId}/${this.userId}`, formData).then(
-        () => {
+        response => {
           this.isLoading = false;
           this.finished = true;
-          this.userMessage = "Your answers have been successfuly submitted.";
+          const status = response && response.data && response.data.result;
+          switch (status) {
+            case -1:
+              this.userMessage =
+                "Incorrect Test. Please use the correct test url/id";
+              break;
+            case -2:
+              this.userMessage =
+                "Test timer elapsed before you finished. Answers were not submitted.";
+              break;
+            case 0:
+            default:
+              this.userMessage =
+                "Your answers have been successfuly submitted.";
+          }
         },
         error => {
           this.isLoading = false;

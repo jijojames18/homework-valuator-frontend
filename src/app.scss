@@ -12,6 +12,20 @@
       border-radius: 8px;
     }
 
+    .flip-clock {
+      .flip-card__top,
+      .flip-card__bottom,
+      .flip-card__back:before,
+      .flip-card__back-bottom {
+        background: #fff;
+      }
+
+      .flip-card__bottom,
+      .flip-card__back-bottom {
+        border-top: solid 1px #fff;
+      }
+    }
+
     margin-top: 14px;
     max-width: 850px;
 
