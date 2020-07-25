@@ -1,0 +1,15 @@
+{
+    "instructions": "Instructions for the test <br /> 1. Instruction 1 <br /> 2. Instruction 2",
+    "buttons": {
+        "submit": "Submit"
+    },
+    "rollNumber": "Roll Number",
+    "errorMessages": {
+        "incorrectTest": "Incorrect Test. Please use the correct test url/id.",
+        "internalError": "Internal error. Please contact your teacher.",
+        "testNotFound": "No test found.",
+        "testDeadlinePassed": "Test timer elapsed before you finished. Answers were not submitted.",
+        "internalErrorWhileSubmiting": "Internal error. Your answers are not submitted. Please contact your teacher."
+    },
+    "testFinishedSuccessfuly": "Your answers have been successfuly submitted."
+}

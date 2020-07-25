@@ -16,8 +16,13 @@
       <b-form @submit="submitResponse" me>
         <b-container fluid="md" class="container background-container">
           <b-row class="justify-content-md-left">
+            <b-col col lg="12" v-html="getMessage('instructions')"></b-col>
+          </b-row>
+        </b-container>
+        <b-container fluid="md" class="container background-container">
+          <b-row class="justify-content-md-left">
             <b-col col lg="4">
-              <label for="input-user-id">Roll Number</label>
+              <label for="input-user-id">{{ getMessage("rollNumber") }}</label>
             </b-col>
           </b-row>
           <b-row class="justify-content-md-left">
@@ -70,7 +75,9 @@
         <b-container fluid="md" class="container">
           <b-row class="justify-content-md-left">
             <b-col col lg="1" class="button-col">
-              <b-button type="submit" variant="primary">Submit</b-button>
+              <b-button type="submit" variant="primary">{{
+                getMessage("buttons.submit")
+              }}</b-button>
             </b-col>
           </b-row>
         </b-container>
@@ -112,10 +119,13 @@ export default {
       this.testId = testId;
       this.fetchData();
     } else {
-      this.userMessage = "Incorrect Test. Please use the correct test url/id";
+      this.userMessage = this.getMessage("errorMessages.incorrectTest");
     }
   },
   methods: {
+    getMessage(id) {
+      return this.$t(id) || "";
+    },
     resetResponse() {
       let i = 0;
       while (i < this.questions.length) {
@@ -144,7 +154,7 @@ export default {
         .catch(error => {
           this.isLoading = false;
           console.error(error);
-          this.userMessage = "Internal error. Please contact your teacher.";
+          this.userMessage = this.getMessage("errorMessages.internalError");
         });
     },
     fetchExistingResponse() {
@@ -165,7 +175,7 @@ export default {
         .catch(error => {
           this.resetResponse();
           console.error(error);
-          this.userMessage = "No test found";
+          this.userMessage = this.getMessage("errorMessages.testNotFound");
         });
     },
     submitResponse(evt) {
@@ -187,24 +197,24 @@ export default {
           const status = response && response.data && response.data.result;
           switch (status) {
             case -1:
-              this.userMessage =
-                "Incorrect Test. Please use the correct test url/id";
+              this.userMessage = this.getMessage("errorMessages.incorrectTest");
               break;
             case -2:
-              this.userMessage =
-                "Test timer elapsed before you finished. Answers were not submitted.";
+              this.userMessage = this.getMessage(
+                "errorMessages.testDeadlinePassed"
+              );
               break;
             case 0:
             default:
-              this.userMessage =
-                "Your answers have been successfuly submitted.";
+              this.userMessage = this.getMessage("testFinishedSuccessfuly");
           }
         },
         error => {
           this.isLoading = false;
           console.error(error);
-          this.userMessage =
-            "Internal error. Your answers are not submitted. Please contact your teacher.";
+          this.userMessage = this.getMessage(
+            "errorMessages.internalErrorWhileSubmiting"
+          );
         }
       );
     }
