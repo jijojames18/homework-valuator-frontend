@@ -7,6 +7,7 @@ import Axios from "axios";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
+import i18n from "./i18n";
 
 Vue.use(BootstrapVue);
 Vue.use(BootstrapVueIcons);
@@ -18,5 +19,6 @@ Axios.defaults.baseURL = process.env.VUE_APP_API_ENDPOINT_URL;
 new Vue({
   router,
   store,
+  i18n,
   render: h => h(App)
 }).$mount("#app");
