@@ -27,6 +27,8 @@ To change the default language, modify the environment variables inside the env.
 
 To add support for a new language, create a new file with name `<language_shorthand>.json` and place it inside `locales.json`. Copy contents of an exisitng json file and modify the values and restart the npm server.
 
+For development purposes, copy `.env.example` and rename it to `.env` and configure the environment variables. For deploying to production, these variables needs to be configured into the corresponding cloud provider in which the app is deployed.
+
 ## Project setup
 ```
 npm install
